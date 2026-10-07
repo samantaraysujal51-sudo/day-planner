@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day Planner</title>
+<style>
+:root{--navy:#20254f;--bg:#f3f3ef;--acc:#4f55e8;--tx:#1a1a1a;--mu:#6b7280;--bd:#e5e5e0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+button,input,select,textarea{font:inherit}[hidden]{display:none!important}
+h1{margin:0;font-size:26px}.sub{margin:4px 0 0;color:var(--mu);font-size:14px}
+input,select,textarea{width:100%;padding:11px 13px;border:1px solid var(--bd);border-radius:10px;background:#fff}
+label{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+.btn{padding:10px 18px;border:1px solid var(--bd);background:#fff;border-radius:10px;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.sm{padding:5px 10px;font-size:12px}.btn.dng{color:#dc2626}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:20px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%}
+/* auth */
+#auth{min-height:100vh;display:grid;place-items:center;padding:16px;background:linear-gradient(135deg,var(--navy),#3a3f8f)}
+.abox{width:100%;max-width:420px;background:#fff;border-radius:18px;padding:28px}
+.abox h2{margin:0;font-size:28px}.abox .sub{margin-bottom:18px}
+.tabs{display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:12px}
+.tabs button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font-weight:600;color:var(--mu);cursor:pointer;font-size:13px}
+.tabs button.on{background:#fff;color:var(--acc);box-shadow:0 1px 3px #0002}
+.srv{font-size:12.5px;margin-top:12px;padding:8px 10px;border-radius:8px;background:#f1f5f9;color:#475569;line-height:1.45}.srv.ok{background:#dcfce7;color:#166534}.srv.warn{background:#fef3c7;color:#92400e}.srv.bad{background:#fee2e2;color:#991b1b}.srv a{text-decoration:underline;cursor:pointer;font-weight:600}
+.err{color:#dc2626;font-size:13px;margin-top:12px;min-height:18px}.abox .btn{width:100%;margin-top:14px;padding:12px}
+/* shell */
+#app{display:flex;min-height:100vh}
+aside{width:224px;background:var(--navy);color:#fff;padding:20px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex:none}
+aside h3{margin:0;font-size:24px}aside small{color:#9aa0d6;font-size:11px;letter-spacing:.5px}
+nav{margin:28px 0;display:flex;flex-direction:column;gap:4px;flex:1}
+nav a{padding:11px 14px;border-radius:10px;color:#d4d7f5;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:15px}
+nav a:before{content:"";width:7px;height:7px;border-radius:50%;background:#6c71c4}
+nav a.on{background:var(--acc);color:#fff}nav a.on:before{background:#fff}
+.user{border-top:1px solid #ffffff22;padding-top:16px;display:flex;gap:12px;align-items:center}
+.av{width:42px;height:42px;border-radius:50%;background:#6c71c4;display:grid;place-items:center;font-weight:700;flex:none}
+.user b{display:block;font-size:14px}.user span{font-size:12px;color:#aab}.user a{font-size:12px;color:#aab;cursor:pointer;text-decoration:underline}
+main{flex:1;padding:28px 34px;min-width:0}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:24px}
+.row{display:flex;gap:12px;align-items:center}.row input{width:260px}
+.cols{display:grid;grid-template-columns:1fr 330px;gap:22px;align-items:start}.side{display:flex;flex-direction:column;gap:20px}
+.card h4{margin:0 0 14px;font-size:16px}.card.flush{padding:0}
+.hd{display:flex;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--bd);font-weight:700}.hd span{font-weight:400;color:var(--mu);font-size:13px}
+.trow{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--bd)}.trow:last-child{border:0}
+.tm{width:66px;color:var(--mu);font-size:14px;font-weight:600;flex:none}
+.chk{width:22px;height:22px;border-radius:6px;border:2px solid #cfd0d8;background:#fff;color:#fff;font-size:13px;cursor:pointer;flex:none;padding:0}
+.chk.on{background:#16a34a;border-color:#16a34a}.chk.miss{background:#dc2626;border-color:#dc2626}
+.tt{flex:1;min-width:0}.tt b{display:block}.tt small{color:var(--mu)}
+.trow.done .tt b,.trow.done .tm{text-decoration:line-through;color:var(--mu)}
+.acts{display:flex;gap:6px}.empty{padding:30px;text-align:center;color:var(--mu)}
+.wkmini{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:13px;color:var(--mu);gap:4px}
+.wkmini div b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;margin:6px auto 0;color:var(--tx);font-weight:500}
+.wkmini .t b{background:var(--acc);color:#fff}
+.brk{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--mu);font-size:14px}
+.up b{display:block}.up{margin-bottom:12px}.up small{color:var(--mu)}
+/* form */
+.fwrap{max-width:640px;margin:0 auto}.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{padding:8px 16px;border-radius:99px;border:2px solid transparent;cursor:pointer;font-weight:600;font-size:14px;background:#fff}
+.chip.sel{border-color:var(--acc);background:#eef}.chip.out{border:1px solid var(--bd);color:var(--mu)}
+.chip.hi.sel{border-color:#e5484d;background:#fdecec;color:#e5484d}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.g3 label{margin-top:16px}
+.fbtn{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}
+/* week */
+.wkscroll{overflow-x:auto}.wk{display:grid;grid-template-columns:56px repeat(7,1fr);min-width:760px}
+.wk .dh{padding:10px;text-align:center;border-bottom:1px solid var(--bd);border-left:1px solid var(--bd);color:var(--mu);font-size:12px;text-transform:uppercase}
+.wk .dh b{display:block;font-size:18px;color:var(--tx)}.wk .dh.t b{color:var(--acc)}
+.tc div{height:44px;font-size:12px;color:var(--mu);text-align:right;padding:4px 8px 0 0}
+.dc{position:relative;border-left:1px solid var(--bd);background:repeating-linear-gradient(#fff 0 43px,var(--bd) 43px 44px)}
+.blk{position:absolute;left:3px;right:3px;border-radius:7px;color:#fff;font-size:12px;font-weight:600;padding:4px 7px;overflow:hidden;opacity:.95}
+.leg{display:flex;gap:8px;flex-wrap:wrap}
+/* reminders / switch */
+.rg{font-size:13px;font-weight:700;color:var(--mu);text-transform:uppercase;margin:24px 0 10px}
+.sw{position:relative;width:42px;height:24px;flex:none}.sw input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:1}
+.sw span{position:absolute;inset:0;background:#d4d4d8;border-radius:99px;transition:.2s}
+.sw span:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+span{background:var(--acc)}.sw input:checked+span:before{transform:translateX(18px)}
+/* tables / admin */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}.stats .card b{font-size:28px;display:block}.stats .card span{color:var(--mu);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mu);font-size:12px;text-transform:uppercase}.tscroll{overflow-x:auto}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 20px;border-radius:12px;z-index:9;max-width:90%}
+@media(max-width:860px){
+ #app{flex-direction:column}aside{width:100%;height:auto;position:static;padding:14px}
+ nav{flex-direction:row;overflow-x:auto;margin:12px 0}nav a{white-space:nowrap;padding:9px 12px}.user{display:none}
+ main{padding:18px 14px}.cols{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.row{width:100%}.row input{flex:1;width:auto}.g3{grid-template-columns:1fr}
+ .tm{width:56px;font-size:12px}.acts{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="auth" hidden><div class="abox" id="abox"></div></div>
+<div id="app" hidden>
+  <aside><h3>Day Planner</h3><small>STUDENT SCHEDULE PLANNER</small><nav id="nav"></nav>
+    <div class="user"><div class="av" id="av"></div><div><b id="un"></b><span id="uc"></span><br><a onclick="logout()">Log out</a></div></div></aside>
+  <main id="main"></main>
+</div>
+<div id="toast" hidden></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s), pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const monday=d=>addD(d,-((d.getDay()+6)%7));
+const t12=t=>{const[h,m]=t.split(':').map(Number);return `${h%12||12}:${pad(m)} ${h<12?'AM':'PM'}`};
+const mins=t=>{const[h,m]=t.split(':').map(Number);return h*60+m};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pill=(n,c)=>`<span class="pill" style="background:${c}1f;color:${c}"><i style="background:${c}"></i>${esc(n)}</span>`;
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], FULL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const lbl=m=>m>=1440?`${m/1440} day`:m>=60?`${m/60} hour`:`${m} min`;
+const main=h=>$('#main').innerHTML=h;
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3000)}
+
+let token=localStorage.getItem('dp_token'), me=JSON.parse(localStorage.getItem('dp_me')||'null');
+let view='today', cats=[], T={}, wkStart=monday(new Date()), aid=null, F=null;
+
+/* ---------- talking to the server ---------- */
+let API='', found=false;   // API='' means "same server that served this page"
+const NOSERVER='Cannot reach the server. In the project folder run "npm start", then open http://localhost:3000';
+async function findServer(){
+  for(const base of ['','http://localhost:3000']){
+    if(base===''&&location.protocol==='file:')continue;
+    try{const r=await fetch(base+'/api/health'),j=await r.json();if(j&&j.app==='day-planner'){API=base;return j}}catch{}
+  }
+  return null;
+}
+async function req(path,opt){
+  if(!found)found=!!(await findServer());
+  if(!found)throw new Error(NOSERVER);
+  let r;try{r=await fetch(API+path,opt)}catch{found=false;throw new Error(NOSERVER)}
+  const j=await r.json().catch(()=>({}));
+  return {r,j};
+}
+async function api(p,m='GET',b){
+  const {r,j}=await req('/api'+p,{method:m,headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:b?JSON.stringify(b):undefined});
+  if(r.status===401&&token){logout();throw new Error('Session expired')}
+  if(!r.ok)throw new Error(j.error||'Something went wrong');
+  return j;
+}
+async function checkServer(){
+  const el=$('#srv');if(!el)return;
+  el.className='srv';el.textContent='Checking server…';
+  found=false;const j=await findServer();found=!!j;
+  const el2=$('#srv');if(!el2)return;
+  if(!j){el2.className='srv bad';el2.innerHTML='Server not running. In the project folder run <b>npm start</b>, then open <b>http://localhost:3000</b>. <a onclick="checkServer()">Retry</a>';return}
+  if(!j.db){el2.className='srv warn';el2.innerHTML='Server is running, but the database is not connected: '+esc(j.dbError||'unknown error')+' <a onclick="checkServer()">Retry</a>';return}
+  el2.className='srv ok';el2.textContent='Connected to server ✓';
+}
+const load=async p=>{const r=await api(p);r.forEach(t=>T[t.task_id]=t);return r};
+const safe=fn=>async(...a)=>{try{await fn(...a)}catch(e){toast(e.message)}};
+
+/* ---------- login / create account ---------- */
+function authScreen(tab='student'){
+  $('#auth').hidden=false;$('#app').hidden=true;
+  const tabs=[['student','Student Login'],['admin','Admin Login'],['signup','Create Account']];
+  const forms={
+   student:`<label>Email</label><input id="i1" type="email" placeholder="you@example.com" autocomplete="username"><label>Password</label><input id="i2" type="password" maxlength="8" autocomplete="current-password"><button class="btn pri" onclick="doLogin('student')">Login</button>`,
+   admin:`<label>Admin username</label><input id="i1" autocomplete="username"><label>Password</label><input id="i2" type="password" autocomplete="current-password"><button class="btn pri" onclick="doLogin('admin')">Login as Admin</button>`,
+   signup:`<label>Full name</label><input id="s1" placeholder="Your full name"><label>Phone number</label><input id="s2" inputmode="numeric" maxlength="10" placeholder="10 digit number" oninput="this.value=this.value.replace(/\\D/g,'')"><label>Email ID</label><input id="s3" type="email"><label>Class name</label><input id="s4" placeholder="e.g. TY.CS"><label>Password (8 characters)</label><input id="s5" type="password" maxlength="8" minlength="8"><button class="btn pri" onclick="doSignup()">Create Account</button>`};
+  $('#abox').innerHTML=`<h2>Day Planner</h2><p class="sub">Student Schedule Planner</p>
+   <div class="tabs">${tabs.map(([k,v])=>`<button class="${k===tab?'on':''}" onclick="authScreen('${k}')">${v}</button>`).join('')}</div>
+   <div onkeydown="if(event.key==='Enter')document.querySelector('.abox .btn').click()">${forms[tab]}</div><div class="err" id="err"></div><div class="srv" id="srv"></div>`;checkServer();
+}
+const aerr=m=>$('#err').textContent=m;
+async function doLogin(role){
+  aerr('');
+  try{
+    const {r,j}=await req('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role,identifier:$('#i1').value.trim(),password:$('#i2').value})});
+    if(!r.ok)return aerr(j.error||'Login failed ('+r.status+').');
+    token=j.token;me=j.me;localStorage.setItem('dp_token',token);localStorage.setItem('dp_me',JSON.stringify(me));start();
+  }catch(e){aerr(e.message)}
+}
+async function doSignup(){
+  aerr('');
+  const b={name:$('#s1').value,phone:$('#s2').value,email:$('#s3').value.trim(),course_class:$('#s4').value,password:$('#s5').value};
+  if(!b.name.trim())return aerr('Enter your full name.');
+  if(!/^\d{10}$/.test(b.phone))return aerr('Phone number must be exactly 10 digits.');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(b.email))return aerr('Enter a valid email.');
+  if(!b.course_class.trim())return aerr('Enter your class name.');
+  if(b.password.length!==8)return aerr('Password must be exactly 8 characters.');
+  try{
+    const {r,j}=await req('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+    if(!r.ok)return aerr(j.error||'Could not create account ('+r.status+').');
+    authScreen('student');toast('Account created! Please log in.');
+  }catch(e){aerr(e.message)}
+}
+function logout(){localStorage.removeItem('dp_token');localStorage.removeItem('dp_me');token=me=null;authScreen()}
+
+/* ---------- app shell ---------- */
+const NAV={student:[['today','Today'],['week','Week'],['routines','Routines'],['reminders','Reminders'],['categories','Categories'],['profile','Profile']],admin:[['students','Students']]};
+async function start(){
+  if(!token||!me)return authScreen();
+  $('#auth').hidden=true;$('#app').hidden=false;
+  $('#un').textContent=me.name;$('#uc').textContent=me.role==='admin'?'Administrator':me.course_class;
+  $('#av').textContent=me.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  view=me.role==='admin'?'students':'today';
+  if(me.role==='student')try{cats=await api('/categories')}catch{}
+  go(view);
+}
+function go(v,arg){
+  view=v;if(arg!==undefined)aid=arg;
+  $('#nav').innerHTML=NAV[me.role].map(([k,n])=>`<a class="${k===v||(v==='student'&&k==='students')||(v==='add'&&k==='today')?'on':''}" onclick="go('${k}')">${n}</a>`).join('');
+  if(v==='add'&&arg===undefined)F=null;
+  safe(views[v])();window.scrollTo(0,0);
+}
+const render=()=>go(view);
+
+/* ---------- task rows ---------- */
+function row(t,ro,showDate){
+  const bits=[`${t12(t.start_time)} – ${t12(t.end_time)}`];
+  if(t.priority==='High')bits.push('Priority: High');
+  if(t.remind_on)bits.push(`Reminder ${lbl(t.remind_minutes)} before`);
+  if(t.repeat_type!=='none')bits.push('Recurring · '+(t.repeat_type==='daily'?'every day':'every '+FULL[new Date(t.task_date+'T00:00:00').getDay()]));
+  if(t.status==='Missed')bits.push('Missed');
+  const c=t.status==='Completed'?'on':t.status==='Missed'?'miss':'';
+  return `<div class="trow ${t.status==='Completed'?'done':''}"><span class="tm">${showDate?DN[new Date(t.date+'T00:00:00').getDay()]+' '+t.date.slice(8)+'<br>':''}${t12(t.start_time)}</span>
+   ${ro?`<span class="chk ${c}">${c?(c==='on'?'✓':'✕'):''}</span>`:`<button class="chk ${c}" onclick="setStatus(${t.task_id},'${t.date}','${t.status==='Completed'?'Pending':'Completed'}')">${c==='on'?'✓':c==='miss'?'✕':''}</button>`}
+   <div class="tt"><b>${esc(t.title)}</b><small>${esc(bits.join(' · '))}</small></div>${pill(t.category_name,t.color)}
+   ${ro?'':`<div class="acts"><button class="btn sm" onclick="editTask(${t.task_id})">Edit</button><button class="btn sm" onclick="setStatus(${t.task_id},'${t.date}','Missed')">Missed</button><button class="btn sm dng" onclick="delTask(${t.task_id})">Delete</button></div>`}</div>`;
+}
+const setStatus=safe(async(id,date,status)=>{await api(`/tasks/${id}/status`,'POST',{date,status});render()});
+const delTask=safe(async id=>{if(!confirm('Delete this task (and all its repeats)?'))return;await api('/tasks/'+id,'DELETE');toast('Task deleted');render()});
+const editTask=id=>{F={...T[id],edit:id};go('add',0)};
+
+/* ---------- views ---------- */
+const views={};
+views.today=async()=>{
+  const now=new Date(),ws=monday(now),today=ymd(now);
+  const wk=await load(`/tasks?from=${ymd(ws)}&to=${ymd(addD(ws,6))}`),tl=wk.filter(t=>t.date===today),done=tl.filter(t=>t.status==='Completed').length;
+  const h=now.getHours(),g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const by={};wk.forEach(t=>{(by[t.category_name]??={c:t.color,n:0}).n++});
+  const nowM=now.getHours()*60+now.getMinutes();
+  const ups=tl.filter(t=>t.remind_on&&t.status==='Pending'&&mins(t.start_time)-t.remind_minutes>=nowM).slice(0,4);
+  main(`<div class="top"><div><h1>${g}, ${esc(me.name.split(' ')[0])}</h1><p class="sub">${FULL[now.getDay()]}, ${now.getDate()} ${now.toLocaleString('en',{month:'long'})} · ${tl.length} tasks today · ${done} completed</p></div>
+   <div class="row"><input id="q" placeholder="Search tasks, categories..." oninput="doSearch(this.value)"><button class="btn pri" onclick="go('add')">+ Add Task</button></div></div>
+   <div class="cols"><div class="card flush"><div class="hd" id="sh">Today's Schedule<span>${tl.length-done} pending · ${done} done</span></div><div id="sl">${tl.length?tl.map(t=>row(t)).join(''):'<div class="empty">Nothing scheduled today. Tap “+ Add Task”.</div>'}</div></div>
+   <div class="side"><div class="card"><h4>This Week</h4><div class="wkmini">${[0,1,2,3,4,5,6].map(i=>{const d=addD(ws,i);return `<div class="${ymd(d)===today?'t':''}">${DN[d.getDay()]}<b>${d.getDate()}</b></div>`}).join('')}</div></div>
+   <div class="card"><h4>Category Breakdown</h4>${Object.entries(by).map(([n,v])=>`<div class="brk">${pill(n,v.c)}<span>${v.n} tasks</span></div>`).join('')||'<span class="sub">No tasks this week.</span>'}</div>
+   <div class="card"><h4>Upcoming Reminders</h4>${ups.map(t=>{const m=mins(t.start_time)-t.remind_minutes;return `<div class="up"><b>${esc(t.title)}</b><small>Today, ${t12(pad(Math.floor(m/60))+':'+pad(m%60))}</small></div>`}).join('')||'<span class="sub">No more reminders today.</span>'}</div></div></div>`);
+  window._today=tl;
+};
+let st;const doSearch=v=>{clearTimeout(st);st=setTimeout(safe(async()=>{
+  const q=v.trim().toLowerCase();
+  if(!q){$('#sh').firstChild.textContent="Today's Schedule";$('#sl').innerHTML=window._today.length?window._today.map(t=>row(t)).join(''):'<div class="empty">Nothing scheduled today.</div>';return}
+  const n=new Date(),r=(await load(`/tasks?from=${ymd(addD(n,-30))}&to=${ymd(addD(n,90))}`)).filter(t=>(t.title+t.category_name+(t.notes||'')).toLowerCase().includes(q));
+  $('#sh').firstChild.textContent='Search results';$('#sl').innerHTML=r.length?r.slice(0,40).map(t=>row(t,false,true)).join(''):'<div class="empty">No matching tasks.</div>';
+}),300)};
+
+async function weekPage(base,ro,title){
+  const list=await load(`${base}?from=${ymd(wkStart)}&to=${ymd(addD(wkStart,6))}`),today=ymd(new Date());
+  const rec=new Set(list.filter(t=>t.repeat_type!=='none').map(t=>t.task_id)).size,H0=6,PX=44;
+  const cols=[0,1,2,3,4,5,6].map(i=>{const d=ymd(addD(wkStart,i));return `<div class="dc" style="height:${18*PX}px">${list.filter(t=>t.date===d).map(t=>{
+    const s=mins(t.start_time)/60,e=mins(t.end_time)/60;
+    return `<div class="blk" style="top:${Math.max(0,(s-H0)*PX)}px;height:${Math.max(22,(e-s)*PX-2)}px;background:${t.color}" title="${esc(t.title)} ${t12(t.start_time)}–${t12(t.end_time)}">${esc(t.title)}</div>`}).join('')}</div>`}).join('');
+  const we=addD(wkStart,6),mo=d=>d.toLocaleString('en',{month:'short'});
+  const cs={};list.forEach(t=>cs[t.category_name]=t.color);
+  return `<div class="top"><div><h1>${title}Week of ${wkStart.getDate()} ${mo(wkStart)} – ${we.getDate()} ${mo(we)}</h1><p class="sub">${list.length} tasks scheduled · ${rec} recurring routines active</p></div>
+   <div class="row"><button class="btn" onclick="shiftWk(-7)">‹ Prev</button><button class="btn" onclick="wkStart=monday(new Date());render()">This week</button><button class="btn" onclick="shiftWk(7)">Next ›</button></div></div>
+   <div class="leg" style="margin-bottom:14px">${Object.entries(cs).map(([n,c])=>pill(n,c)).join('')}</div>
+   <div class="card flush wkscroll"><div class="wk"><div></div>${[0,1,2,3,4,5,6].map(i=>{const d=addD(wkStart,i);return `<div class="dh ${ymd(d)===today?'t':''}">${DN[d.getDay()]}<b>${d.getDate()}</b></div>`}).join('')}
+   <div class="tc">${Array.from({length:18},(_,i)=>`<div>${t12((H0+i)+':00').replace(':00','')}</div>`).join('')}</div>${cols}</div></div>`+
+   (ro?`<div class="card flush" style="margin-top:20px"><div class="hd">All tasks this week</div>${list.length?list.map(t=>row(t,true,true)).join(''):'<div class="empty">No tasks this week.</div>'}</div>`:'');
+}
+const shiftWk=n=>{wkStart=addD(wkStart,n);render()};
+views.week=async()=>main(await weekPage('/tasks',false,''));
+
+views.routines=async()=>{
+  const r=await api('/routines');
+  main(`<div class="top"><div><h1>Routines</h1><p class="sub">Daily and weekly habits that repeat automatically</p></div><button class="btn pri" onclick="go('add')">+ New routine</button></div>
+  <div class="card flush" style="max-width:820px">${r.length?r.map(t=>`<div class="trow"><span class="tm">${t12(t.start_time)}</span><div class="tt"><b>${esc(t.title)}</b><small>${t.repeat_type==='daily'?'Every day':'Every '+FULL[new Date(t.task_date+'T00:00:00').getDay()]} · from ${t.task_date}</small></div>${pill(t.category_name,t.color)}
+   <div class="acts"><button class="btn sm" onclick='editTask(${t.task_id})'>Edit</button><button class="btn sm dng" onclick="delTask(${t.task_id})">Delete</button></div></div>`).join(''):'<div class="empty">No routines yet. When adding a task, choose Daily or Weekly under “Repeat”.</div>'}</div>`);
+  r.forEach(t=>T[t.task_id]=t);
+};
+
+views.reminders=async()=>{
+  const n=new Date(),td=ymd(n),tm=ymd(addD(n,1));
+  const l=(await load(`/tasks?from=${td}&to=${ymd(addD(n,7))}`)).filter(t=>t.status==='Pending');
+  const g=[['Today',l.filter(t=>t.date===td)],['Tomorrow',l.filter(t=>t.date===tm)],['This week',l.filter(t=>t.date>tm)]];
+  main(`<div class="top"><div><h1>Reminders</h1><p class="sub">Notifications for your upcoming tasks and routines</p></div><button class="btn" onclick="askNotif()">Notification Settings</button></div>
+  <div style="max-width:760px">${g.map(([n,a])=>a.length?`<div class="rg">${n}</div><div class="card flush">${a.map(t=>{const m=Math.max(0,mins(t.start_time)-t.remind_minutes);
+   return `<div class="trow">${pill(t.category_name,t.color)}<div class="tt"><b>${esc(t.title)}</b><small>${n==='This week'?DN[new Date(t.date+'T00:00:00').getDay()]+', '+t.date.slice(8)+' · ':''}Reminds at ${t12(pad(Math.floor(m/60))+':'+pad(m%60))} · ${lbl(t.remind_minutes)} before${t.repeat_type!=='none'?' · Recurring':''}</small></div>
+   <label class="sw"><input type="checkbox" ${t.remind_on?'checked':''} onchange="api('/tasks/${t.task_id}/remind','PUT',{on:this.checked}).then(()=>toast(this.checked?'Reminder on':'Reminder off'))"><span></span></label></div>`}).join('')}</div>`:'').join('')||'<div class="card empty">No upcoming tasks this week.</div>'}</div>`);
+};
+const askNotif=()=>{if(!('Notification' in window))return toast('This browser does not support notifications.');Notification.requestPermission().then(p=>toast(p==='granted'?'Browser notifications enabled':'Notifications blocked in browser settings'))};
+
+views.categories=async()=>{
+  cats=await api('/categories');
+  main(`<div class="top"><div><h1>Categories</h1><p class="sub">Organise your tasks. Add your own anytime.</p></div></div>
+  <div class="card" style="max-width:620px"><div class="chips">${cats.map(c=>pill(c.category_name,c.color)).join('')}</div>
+  <label>New category</label><div class="row"><input id="cn" placeholder="e.g. Study group" maxlength="40"><input id="cc" type="color" value="#4f55e8" style="width:60px;padding:4px"><button class="btn pri" onclick="addCat()">Add</button></div></div>`);
+};
+const addCat=safe(async()=>{await api('/categories','POST',{name:$('#cn').value,color:$('#cc').value});toast('Category added');render()});
+
+views.profile=async()=>{
+  const p=await api('/me');
+  main(`<div class="top"><div><h1>Profile</h1><p class="sub">Update your personal details</p></div></div>
+  <div class="card" style="max-width:520px"><label style="margin-top:0">Full name</label><input id="pn" value="${esc(p.name)}"><label>Email (cannot be changed)</label><input value="${esc(p.email)}" disabled>
+  <label>Phone number</label><input id="pp" inputmode="numeric" maxlength="10" value="${esc(p.phone)}" oninput="this.value=this.value.replace(/\\D/g,'')"><label>Class</label><input id="pc" value="${esc(p.course_class)}">
+  <div class="fbtn"><button class="btn pri" onclick="saveProfile()">Save changes</button></div></div>`);
+};
+const saveProfile=safe(async()=>{
+  await api('/me','PUT',{name:$('#pn').value,phone:$('#pp').value,course_class:$('#pc').value});
+  me.name=$('#pn').value.trim();me.course_class=$('#pc').value.trim();localStorage.setItem('dp_me',JSON.stringify(me));
+  $('#un').textContent=me.name;$('#uc').textContent=me.course_class;toast('Profile updated');
+});
+
+/* add / edit task form */
+const REM=[0,5,10,15,30,60,1440];
+views.add=async()=>{
+  if(!F){const n=new Date();F={title:'',category_id:cats[0]?.category_id,task_date:ymd(n),start_time:pad(n.getHours()+1>23?23:n.getHours()+1)+':00',end_time:'',priority:'Medium',repeat_type:'none',remind_minutes:30,remind_on:1,notes:''};
+    F.end_time=F.start_time<'23:00'?pad(+F.start_time.slice(0,2)+1)+':00':'23:59'}
+  F.start_time=F.start_time.slice(0,5);F.end_time=F.end_time.slice(0,5);
+  const ch=(k,v,t,c='')=>`<span class="chip ${c} ${F[k]==v?'sel':''}" onclick="setF('${k}','${v}')">${t}</span>`;
+  main(`<div class="fwrap"><h1>${F.edit?'Edit task':'Add a new task'}</h1><p class="sub">Log anything on your plate — it'll slot into your schedule automatically.</p>
+  <div class="card" style="margin-top:22px"><label style="margin-top:0">Title</label><input id="f_title" value="${esc(F.title)}" placeholder="e.g. Operating Systems mock test">
+  <label>Category</label><div class="chips">${cats.map(c=>`<span class="chip ${F.category_id==c.category_id?'sel':''}" onclick="setF('category_id',${c.category_id})">${pill(c.category_name,c.color)}</span>`).join('')}<span class="chip out" style="border-style:dashed" onclick="newCat()">+ New</span></div>
+  <div class="g3"><div><label>Date</label><input id="f_date" type="date" value="${F.task_date}"></div><div><label>Start time</label><input id="f_st" type="time" value="${F.start_time}"></div><div><label>End time</label><input id="f_et" type="time" value="${F.end_time}"></div></div>
+  <label>Priority</label><div class="chips">${['Low','Medium','High'].map(p=>ch('priority',p,p,p==='High'?'out hi':'out')).join('')}</div>
+  <label>Repeat</label><div class="chips">${[['none','Does not repeat'],['daily','Daily'],['weekly','Weekly']].map(([v,t])=>ch('repeat_type',v,t,'out')).join('')}</div>
+  <label>Remind me</label><select id="f_rem">${REM.map(m=>`<option value="${m}" ${F.remind_minutes==m?'selected':''}>${m?lbl(m)+' before':'At start time'}</option>`).join('')}</select>
+  <label>Notes (optional)</label><textarea id="f_notes" rows="3">${esc(F.notes||'')}</textarea>
+  <div class="fbtn"><button class="btn" onclick="F=null;go('today')">Cancel</button><button class="btn pri" onclick="saveTask()">Save Task</button></div></div></div>`);
+};
+function syncF(){F.title=$('#f_title').value;F.task_date=$('#f_date').value;F.start_time=$('#f_st').value;F.end_time=$('#f_et').value;F.remind_minutes=+$('#f_rem').value;F.notes=$('#f_notes').value}
+const setF=(k,v)=>{syncF();F[k]=v;views.add()};
+const newCat=safe(async()=>{
+  const n=prompt('New category name:');if(!n||!n.trim())return;syncF();
+  const pal=['#ef4444','#14b8a6','#f59e0b','#6366f1','#84cc16','#ec4899'];
+  const r=await api('/categories','POST',{name:n,color:pal[Math.floor(Math.random()*pal.length)]});
+  cats=await api('/categories');F.category_id=r.category_id;views.add();
+});
+const saveTask=safe(async()=>{
+  syncF();const b={...F};delete b.edit;
+  if(F.edit)await api('/tasks/'+F.edit,'PUT',b);else await api('/tasks','POST',b);
+  toast('Task saved');F=null;go('today');
+});
+
+/* ---------- admin ---------- */
+views.students=async()=>{
+  const s=await api('/admin/students'),tt=s.reduce((a,x)=>a+x.tasks,0),dd=s.reduce((a,x)=>a+x.completed,0);
+  window._stu=s;
+  main(`<div class="top"><div><h1>Admin Dashboard</h1><p class="sub">See every student and what they are planning</p></div><div class="row"><input placeholder="Search students..." oninput="filterStu(this.value)"></div></div>
+  <div class="stats"><div class="card"><b>${s.length}</b><span>Students</span></div><div class="card"><b>${tt}</b><span>Tasks created</span></div><div class="card"><b>${dd}</b><span>Completed</span></div><div class="card"><b>${tt?Math.round(dd/tt*100):0}%</b><span>Completion rate</span></div></div>
+  <div class="card flush tscroll" id="stbl"></div>`);
+  filterStu('');
+};
+const filterStu=v=>{
+  const q=v.toLowerCase(),a=window._stu.filter(s=>(s.student_name+s.email+s.course_class).toLowerCase().includes(q));
+  $('#stbl').innerHTML=a.length?`<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Class</th><th>Registered</th><th>Tasks</th><th>Done</th><th></th></tr>${a.map(s=>`<tr><td>${s.student_id}</td><td><b>${esc(s.student_name)}</b></td><td>${esc(s.email)}</td><td>${s.phone}</td><td>${esc(s.course_class)}</td><td>${s.registration_date.slice(0,10)}</td><td>${s.tasks}</td><td>${s.completed}</td>
+   <td><button class="btn sm" onclick="viewStu(${s.student_id})">View schedule</button> <button class="btn sm dng" onclick="delStu(${s.student_id})">Delete</button></td></tr>`).join('')}</table>`:'<div class="empty">No students found.</div>';
+};
+const viewStu=id=>{wkStart=monday(new Date());go('student',id)};
+const delStu=safe(async id=>{if(!confirm('Delete this student and all their data?'))return;await api('/admin/students/'+id,'DELETE');toast('Student deleted');render()});
+views.student=async()=>{
+  const s=window._stu.find(x=>x.student_id===aid);
+  main(`<button class="btn sm" onclick="go('students')" style="margin-bottom:14px">‹ Back to students</button>`+await weekPage(`/admin/students/${aid}/tasks`,true,`${esc(s?s.student_name:'Student')} — `));
+};
+
+/* ---------- in-browser reminders (while the app is open) ---------- */
+const fired=new Set();
+setInterval(async()=>{
+  if(!token||!me||me.role!=='student')return;
+  try{
+    const n=new Date(),td=ymd(n),nm=n.getHours()*60+n.getMinutes();
+    (await api(`/tasks?from=${td}&to=${td}`)).forEach(t=>{
+      const k=t.task_id+td,rm=mins(t.start_time)-t.remind_minutes;
+      if(t.remind_on&&t.status==='Pending'&&nm>=rm&&nm<mins(t.start_time)&&!fired.has(k)){
+        fired.add(k);toast(`⏰ ${t.title} at ${t12(t.start_time)}`);
+        if('Notification' in window&&Notification.permission==='granted')new Notification('Day Planner',{body:`${t.title} at ${t12(t.start_time)}`});
+      }
+    });
+  }catch{}
+},30000);
+
+start();
+</script>
+</body>
+</html>
